@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+</head>
+<style>
+  body{
+    background-color: wheat;
+  }
+#employees{
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 70%;
+    }
+#employees th, #employees td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.dropbtn {
+    background-color: #04AA6D;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  /* Dropdown button on hover & focus */
+  .dropbtn:hover, .dropbtn:focus {
+    background-color: #3e8e41;
+  }
+  
+  /* The search field */
+  #myInput {
+    box-sizing: border-box;
+    background-image: url('searchicon.png');
+    background-position: 14px 12px;
+    background-repeat: no-repeat;
+    font-size: 16px;
+    padding: 14px 20px 12px 45px;
+    border: none;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  /* The search field when it gets focus/clicked on */
+  #myInput:focus {outline: 3px solid #ddd;}
+  
+  /* The container <div> - needed to position the dropdown content */
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+  
+  /* Dropdown Content (Hidden by Default) */
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f6f6f6;
+    min-width: 230px;
+    border: 1px solid #ddd;
+    z-index: 1;
+  }
+  
+  /* Links inside the dropdown */
+  .dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+  }
+  
+  /* Change color of dropdown links on hover */
+  .dropdown-content a:hover {background-color: #f1f1f1}
+  
+  /* Show the dropdown menu (use JS to add this class to the .dropdown-content container when the user clicks on the dropdown button) */
+  .show {display:block;}
+  .center {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .scrollit {
+    overflow:scroll;
+    height: 400px;
+}
+  div {
+    margin-top: 8px;
+  }
+  th{
+    top: 0;
+    position: sticky;
+    background: green;
+  }
+  
+</style>
+<body>
+    <section style="margin-top: 20px;">
+
+      <div class="text-center">
+        <div>
+    <h2>Employees attendance table
+    </h2>
+    </div>
+    <div class="dropdown">
+        
+          <input type="text" list="names"  id="searchIn" placeholder="Search by name">
+          <datalist id="names">
+              {% for i in employee %}
+              <option value={{i.name}}>
+              {% endfor %}
+          </datalist>
+          <button  class="btn btn-info" onclick="searchdata()" >Search</button>
+        </div>
+        <div>
+        <form method="POST">
+          {% csrf_token %}
+          From: <input type="date" name="fromdate">
+          To: <input type="date" name="todate">
+          <input class="btn btn-success" type="submit" value="search">
+        </form>
+        </div>
+      </div> 
+      <div class="text-center scrollit">
+        
+
+    <table class="center" id="employees" >
+        <thead bgcolor="green">
+          
+          <tr>
+            <th>Employee Id</th>
+            <th>Employee Name</th>
+            <th>Date</th>
+            <th>check_in Time</th>
+            <th>check_out Time</th>
+          </tr>
+        </thead>
+    {% for i in employee %}
+    <tbody bgcolor="white"> 
+      <tr>
+    <td>{{ i.emp_id }}</td>
+    <td>{{ i.name }}</td>
+    <td>{{ i.date|date:'Y-m-d' }}</td>
+    <td>{{ i.check_in }}</td>
+    <td>{{ i.check_out }}</td>
+      </tr>
+    </tbody>
+    {% endfor %}
+</table>
+</div>
+<button style="margin-left: 650px; margin-top: 10px"><a href="/csv">Export</a></button>
+<!-- <button type="button" onclick="tableToCSV()">
+  Export CSV
+</button> -->
+</div>
+
+ 
+</section>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+<script>
+  function searchdata(){
+    let finalvalue = ""
+    let trvalue
+    let search = document.getElementById('searchIn').value.toUpperCase();
+    let table = document.getElementById('employees');
+    let tr = document.getElementsByTagName('tr');
+    for(var i =0;i<tr.length;i++){
+        let td = tr[i].getElementsByTagName('td')[1];
+        if(td){
+            let textvalue = td.textcontent || td.innerHTML;
+            if(textvalue.toUpperCase().indexOf(search)>-1){
+                tr[i].style.display="";
+                trvalue = tr[i].textContent.trim();
+                finalvalue = finalvalue + trvalue
+                console.log(trvalue)
+            }
+            else{
+                tr[i].style.display="none"
+            }
+        }
+    }
+    finalvalue = finalvalue.trim().split("\n")
+    for(let i=0; i<finalvalue.length; i++){
+      finalvalue[i]= finalvalue[i]+ ','
+    }
+    finalvalue =finalvalue.join('')
+    console.log(finalvalue)
+
+}
+
+function tableToCSV(data) {
+
+  // Variable to store the final csv data
+  var csv_data = [];
+
+  // Get each row data
+  //var rows = document.getElementsByTagName('tr');
+  for (var i = 0; i < data.length; i++) {
+
+      // Get each column data
+      var cols = data[i].querySelectorAll('td,th');
+
+      // Stores each csv row data
+      var csvrow = [];
+      for (var j = 0; j < cols.length; j++) {
+
+          // Get the text data of each cell
+          // of a row and push it to csvrow
+          csvrow.push(cols[j].innerHTML);
+      }
+
+      // Combine each column value with comma
+      csv_data.push(csvrow.join(","));
+  }
+
+  // Combine each row data with new line character
+  csv_data = csv_data.join('\n');
+
+  // Call this function to download csv file 
+  downloadCSVFile(csv_data);
+
+}
+
+function tableToCSV() {
+
+  // Variable to store the final csv data
+  var csv_data = [];
+
+  // Get each row data
+  var rows = document.getElementsByTagName('tr');
+  for (var i = 0; i < rows.length; i++) {
+
+      // Get each column data
+      var cols = rows[i].querySelectorAll('td,th');
+
+      // Stores each csv row data
+      var csvrow = [];
+      for (var j = 0; j < cols.length; j++) {
+
+          // Get the text data of each cell
+          // of a row and push it to csvrow
+          csvrow.push(cols[j].innerHTML);
+      }
+
+      // Combine each column value with comma
+      csv_data.push(csvrow.join(","));
+  }
+
+  // Combine each row data with new line character
+  csv_data = csv_data.join('\n');
+
+  // Call this function to download csv file 
+  downloadCSVFile(csv_data);
+
+}
+
+function downloadCSVFile(csv_data) {
+
+  // Create CSV file object and feed
+  // our csv_data into it
+  CSVFile = new Blob([csv_data], {
+      type: "text/csv"
+  });
+
+  // Create to temporary link to initiate
+  // download process
+  var temp_link = document.createElement('a');
+
+  // Download csv file
+  temp_link.download = "attendance.csv";
+  var url = window.URL.createObjectURL(CSVFile);
+  temp_link.href = url;
+
+  // This link should not be displayed
+  temp_link.style.display = "none";
+  document.body.appendChild(temp_link);
+
+  // Automatically click the link to
+  // trigger download
+  temp_link.click();
+  document.body.removeChild(temp_link);
+}
+</script>
+</html>
